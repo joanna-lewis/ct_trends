@@ -1,0 +1,1491 @@
+iter = 100000, warmup = 50000, init=list(init0), chains = 1, seed=12345)
+#####################
+# plots#
+#####################
+#
+op <- extract(fit)#
+plot(op$lp__, type='l', col=rgb(0,0,0,0.1))#
+pairs(~lp__+lambda_slow+p1+psi,data=op, col=rgb(0,0,0,0.1), pch=16, cex=0.1)#
+hist(op$lambda_slow)#
+hist(op$p1)
+mean(op$lambda_slow)#
+quantile(op$lambda_slow, p=c(0.025, 0.5, 0.975))#
+mean(op$p1)#
+quantile(op$p1, p=c(0.025, 0.5, 0.975))
+# how do estimates of mean and centiles change with increasing number of samples?#
+centiles <- matrix(nrow=100000, ncol=3)#
+mean <- matrix(100000, ncol=1)#
+for(i in 1:100000){#
+	centiles[i,] <- quantile(op$lambda_slow[1:i], p=c(0.025, 0.5, 0.975), na.rm=TRUE)#
+	mean[i] <- mean(op$lambda_slow[1:i], na.rm=TRUE)#
+}#
+plot(centiles[,1], type='l', ylim=c(0.6, 1))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+plot(centiles[,1], type='l', ylim=c(0, 10))
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+7/77
+####################################
+# Run STAN model chlamydia_two_exponentials.stan using the R interface#
+####################################
+#
+library(rstan)#
+#
+#####################
+# data#
+#####################
+# duration#
+# study order#
+# 1 Johhanisson#
+# 2 Joyner#
+# 3 Geisler#
+# 4 Paavonen	#
+# 5 Rahm#
+# 6 Sorensen#
+# 7 McCormack	#
+# 8 Morre	#
+# 9 Mollano#
+#
+chlamydia_dat <- list(#
+	studnum = 9,#
+	studnum_bytype = c(4,3,2),#
+	studobs = c(4,5,1,1,3,1,1,5,4),#
+	cumobs = c(0,cumsum(c(4,5,1,1,3,1,1,5))),#
+	Nobs = sum(4,5,1,1,3,1,1,5,4),#
+	r = c(10,7,6,6, #
+		2,7,1,0,3, #
+		23,#
+		3, #
+		17,0,0,#
+		8, #
+		3, #
+		2,2,4,0,2,#
+		44,23,7,2),#
+	n = c(#
+		23,14,14,8,#
+		12,28,4,8,6, #
+		129, #
+		15, #
+		93,1,1, #
+		13, #
+		7, #
+		20,5,15,1,13, #
+		82,37,14,6), #
+	t = c(#
+		0.038,0.058,0.077,0.125, #
+		0.012,0.03,0.049,0.088,0.274,  #
+		0.045, #
+		0.083, #
+		0.25,0.5,0.75,#
+		1,#
+		1.375, #
+		0.083,0.5,0.417,0.917,0.5, #
+		1,1,1,1), #
+	seind = c(#
+		1,1,1,1, #
+		0,0,0,0,0, #
+		0,#
+		1, #
+		1,1,1,#
+		0, #
+		1, #
+		0,0,0,0,0,#
+		0,0,0,0), #
+	T = c( #
+		999,999,999,999, #
+		999,999,999,999,999, #
+		999,#
+		999, #
+		999,999,999,#
+		999, #
+		999, #
+		0,0,0.083,0.083,0.5, #
+		0,1,2,3#
+		)#
+	)#
+#####################
+# initial values#
+#####################
+#
+# Initial values - 0#
+init0 <- list(psi = 7/77, lambda_slow = 0.74, p1 = 0.23)#
+#
+# Initial values - 1#
+init1 <- list(psi = 0.9, lambda_slow = 0.7, p1 = 0.2)#
+#
+# Initial values - 2#
+init2 <- list(psi = 0.6, lambda_slow = 0.1, p1 = 0.5)#
+#
+#####################
+# run the model#
+#####################
+#
+fit <- stan(file = 'chlamydia_two_exponentials.stan', data = chlamydia_dat, #
+            iter = 150000, warmup = 50000, init=list(init0), chains = 1, seed=12345,#
+            sample_file = 'chlamydia_two_exponentials_init0_280416')
+plot(seq(0,1,0.01), dbeta(seq(0,1,0.01),78,8), type='l')
+#####################
+# run the model#
+#####################
+#
+fit <- stan(file = 'chlamydia_two_exponentials.stan', data = chlamydia_dat, #
+            iter = 2000, warmup = 1000, init=list(init0), chains = 1, seed=12345,#
+            sample_file = 'chlamydia_two_exponentials_init0_280416')
+#####################
+# plots#
+#####################
+#
+op <- extract(fit)#
+plot(op$lp__, type='l', col=rgb(0,0,0,0.1))#
+pairs(~lp__+lambda_slow+p1+psi,data=op, col=rgb(0,0,0,0.1), pch=16, cex=0.1)#
+hist(op$lambda_slow)#
+hist(op$p1)#
+#
+mean(op$lambda_slow)#
+quantile(op$lambda_slow, p=c(0.025, 0.5, 0.975))#
+mean(op$p1)#
+quantile(op$p1, p=c(0.025, 0.5, 0.975))#
+#
+# how do estimates of mean and centiles change with increasing number of samples?#
+centiles <- matrix(nrow=100000, ncol=3)#
+mean <- matrix(100000, ncol=1)#
+for(i in 1:100000){#
+	centiles[i,] <- quantile(op$lambda_slow[1:i], p=c(0.025, 0.5, 0.975), na.rm=TRUE)#
+	mean[i] <- mean(op$lambda_slow[1:i], na.rm=TRUE)#
+}#
+plot(centiles[,1], type='l', ylim=c(0.6, 1))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+#####################
+# run the model#
+#####################
+#
+fit <- stan(file = 'chlamydia_two_exponentials.stan', data = chlamydia_dat, #
+            iter = 2000, warmup = 1000, init=list(init0), chains = 1, seed=12345,#
+            sample_file = 'chlamydia_two_exponentials_init0_280416')
+#####################
+# plots#
+#####################
+#
+op <- extract(fit)#
+plot(op$lp__, type='l', col=rgb(0,0,0,0.1))#
+pairs(~lp__+lambda_slow+p1+psi,data=op, col=rgb(0,0,0,0.1), pch=16, cex=0.1)#
+hist(op$lambda_slow)#
+hist(op$p1)#
+#
+mean(op$lambda_slow)#
+quantile(op$lambda_slow, p=c(0.025, 0.5, 0.975))#
+mean(op$p1)#
+quantile(op$p1, p=c(0.025, 0.5, 0.975))#
+#
+# how do estimates of mean and centiles change with increasing number of samples?#
+centiles <- matrix(nrow=100000, ncol=3)#
+mean <- matrix(100000, ncol=1)#
+for(i in 1:100000){#
+	centiles[i,] <- quantile(op$lambda_slow[1:i], p=c(0.025, 0.5, 0.975), na.rm=TRUE)#
+	mean[i] <- mean(op$lambda_slow[1:i], na.rm=TRUE)#
+}#
+plot(centiles[,1], type='l', ylim=c(0.6, 1))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+op <- extract(fit)#
+plot(op$lp__, type='l', col=rgb(0,0,0,0.1))#
+pairs(~lp__+lambda_slow+p1+psi,data=op, col=rgb(0,0,0,0.1), pch=16, cex=0.1)#
+hist(op$lambda_slow)#
+hist(op$p1)#
+#
+mean(op$lambda_slow)#
+quantile(op$lambda_slow, p=c(0.025, 0.5, 0.975))#
+mean(op$p1)#
+quantile(op$p1, p=c(0.025, 0.5, 0.975))#
+#
+# how do estimates of mean and centiles change with increasing number of samples?#
+centiles <- matrix(nrow=1000, ncol=3)#
+mean <- matrix(1000, ncol=1)#
+for(i in 1:1000){#
+	centiles[i,] <- quantile(op$lambda_slow[1:i], p=c(0.025, 0.5, 0.975), na.rm=TRUE)#
+	mean[i] <- mean(op$lambda_slow[1:i], na.rm=TRUE)#
+}#
+plot(centiles[,1], type='l', ylim=c(0.6, 1))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+#####################
+# run the model#
+#####################
+#
+fit <- stan(file = 'chlamydia_two_exponentials.stan', data = chlamydia_dat, #
+            iter = 3000, warmup = 1000, init=list(init0), chains = 1, seed=12345,#
+            sample_file = 'chlamydia_two_exponentials_init0_280416')
+#####################
+# plots#
+#####################
+#
+op <- extract(fit)#
+plot(op$lp__, type='l', col=rgb(0,0,0,0.1))#
+pairs(~lp__+lambda_slow+p1+psi,data=op, col=rgb(0,0,0,0.1), pch=16, cex=0.1)#
+hist(op$lambda_slow)#
+hist(op$p1)#
+#
+mean(op$lambda_slow)#
+quantile(op$lambda_slow, p=c(0.025, 0.5, 0.975))#
+mean(op$p1)#
+quantile(op$p1, p=c(0.025, 0.5, 0.975))#
+#
+# how do estimates of mean and centiles change with increasing number of samples?#
+centiles <- matrix(nrow=2000, ncol=3)#
+mean <- matrix(2000, ncol=1)#
+for(i in 1:2000){#
+	centiles[i,] <- quantile(op$lambda_slow[1:i], p=c(0.025, 0.5, 0.975), na.rm=TRUE)#
+	mean[i] <- mean(op$lambda_slow[1:i], na.rm=TRUE)#
+}#
+plot(centiles[,1], type='l', ylim=c(0.6, 1))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+length*op$lambda_slow
+length(op$lambda_slow)
+#####################
+# run the model#
+#####################
+#
+fit <- stan(file = 'chlamydia_two_exponentials.stan', data = chlamydia_dat, #
+            iter = 22000, warmup = 2000, init=list(init0), chains = 1, seed=12345,#
+            sample_file = 'chlamydia_two_exponentials_init0_280416')
+#####################
+# plots#
+#####################
+#
+op <- extract(fit)#
+plot(op$lp__, type='l', col=rgb(0,0,0,0.1))#
+pairs(~lp__+lambda_slow+p1+psi,data=op, col=rgb(0,0,0,0.1), pch=16, cex=0.1)#
+hist(op$lambda_slow)#
+hist(op$p1)#
+#
+mean(op$lambda_slow)#
+quantile(op$lambda_slow, p=c(0.025, 0.5, 0.975))#
+mean(op$p1)#
+quantile(op$p1, p=c(0.025, 0.5, 0.975))#
+#
+# how do estimates of mean and centiles change with increasing number of samples?#
+centiles <- matrix(nrow=2000, ncol=3)#
+mean <- matrix(2000, ncol=1)#
+for(i in 1:2000){#
+	centiles[i,] <- quantile(op$lambda_slow[1:i], p=c(0.025, 0.5, 0.975), na.rm=TRUE)#
+	mean[i] <- mean(op$lambda_slow[1:i], na.rm=TRUE)#
+}#
+plot(centiles[,1], type='l', ylim=c(0.6, 1))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+length(op$lp__)
+plot(centiles[,1], type='l', ylim=c(0.6, 1))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+# how do estimates of mean and centiles change with increasing number of samples?#
+centiles <- matrix(nrow=20000, ncol=3)#
+mean <- matrix(20000, ncol=1)#
+for(i in 1:20000){#
+	centiles[i,] <- quantile(op$lambda_slow[1:i], p=c(0.025, 0.5, 0.975), na.rm=TRUE)#
+	mean[i] <- mean(op$lambda_slow[1:i], na.rm=TRUE)#
+}#
+plot(centiles[,1], type='l', ylim=c(0.6, 1))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+write.csv(op$lambda_slow[10001:20000])
+write.csv(op$lambda_slow[10001:20000], file='chlamydia_two_exponentials_init0_280416.csv')
+write.csv(op$lambda_slow[10001:20000], file='chlamydia_two_exponentials_init0_280416.csv', row.names=FALSE, header=FALSE)
+write.csv(op$lambda_slow[10001:20000], file='chlamydia_two_exponentials_init0_280416.csv', row.names=FALSE)
+qnorm(0.5)
+qbeta(0.025, 69 + 1, 78 - 69 + 1)
+qbeta(0.5, 69 + 1, 78 - 69 + 1)
+qbeta(0.975, 69 + 1, 78 - 69 + 1)
+qbeta(0.025, 135 + 1, 26 + 1)
+qbeta(0.5, 135 + 1, 26 + 1)
+qbeta(0.975, 135 + 1, 26 + 1)
+##################################
+# reported chlamydia testing and diagnoses in natsal3#
+##################################
+#
+rm(list=ls())#
+#
+library(readstata13)#
+library(survey)#
+#
+##############################################
+# data section#
+##############################################
+#
+# full natsal dataset from ukda: 15162 rows#
+natsal3 <- read.dta13("~/Documents/data/natsal-3/UKDA-7799-stata11/stata11/eul_natsal_2010_for_archive.dta") #
+#
+# offered a chlamydia test in the last year?#
+natsal3$ct_offer <- NA#
+natsal3$ct_offer[natsal3$whnchlam == 1] <- 'Yes'#
+natsal3$ct_offer[natsal3$chlmtest == 1] <- 'Yes'#
+natsal3$ct_offer[natsal3$chlofref == 1] <- 'Yes'#
+# set up survey design#
+udesign <- svydesign(#
+  id = ~ psu_scrm,#
+  strata = ~ strata,#
+  data = natsal3,#
+  weight = ~ total_wt#
+)
+##############################################
+# how likely are people to get tested at least once during the year, and why?#
+##############################################
+#
+# proportion tested in the last year#
+tmp <- svyby(~ct_t == 3, by=~ dage + ct_t_elig, design=udesign_td1644, svymean)#
+tmp <- tmp[tmp$ct_t_elig,]#
+plot(tmp$dage, tmp$'ct_t == 3TRUE', xlab = 'age/years', ylab = 'Proportion of those eligible', ylim=c(0,0.7))#
+arrows(tmp$dage, y0=tmp$'ct_t == 3TRUE'-tmp$'se.ct_t == 3TRUE', y1=tmp$'ct_t == 3TRUE'+tmp$'se.ct_t == 3TRUE', angle=90, code=3, length=0.05)#
+#
+# proportion offered a test in the last year#
+tmp <- svyby(~ct_t_off, by=~ dage + ct_t_elig, design=udesign_td1644, svymean)#
+tmp <- tmp[tmp$ct_t_elig,]#
+points(tmp$dage, tmp$ct_t_offTRUE, col=2)#
+arrows(tmp$dage, y0=tmp$ct_t_offTRUE - tmp$se.ct_t_offTRUE, y1=tmp$ct_t_offTRUE + tmp$se.ct_t_offTRUE, angle=90, code=3, length=0.05, col=2)#
+#
+abline(v=17); text(x=17, y=0, 'Left compulsary education, last year', srt=90, adj=c(0,1))#
+abline(v=19); text(x=19, y=0, 'Left 16-18 education, last year', srt=90, adj=c(0,1))#
+abline(v=25); text(x=25, y=0, 'Left NCSP, last year', srt=90, adj=c(0,1))#
+legend(37, 0.65, c('Test offered','Test taken'), pch=1, col=c(2,1))#
+#
+# proportion taking a test for different reasons, last year#
+plot(c(15,45), c(0,0.25), xlab = 'age/years', ylab = 'Proportion of those eligible who were tested', pch='')#
+abline(v=17)#
+abline(v=19)#
+abline(v=25)#
+for(i in levels(natsal3$chltstwy)[-1]){ # don't do the 'Not applicable's#
+	rstr <- paste(3, as.character(i)) # string for reason#
+	tmp <- svyby(~ct_reason==rstr, by=~ dage + ct_t_elig, design=udesign_td1644, svymean)#
+	tmp <- tmp[tmp$ct_t_elig,]#
+	points(tmp$dage, tmp$'ct_reason == rstrTRUE', col=which(i==levels(natsal3$chltstwy)[-1]), pch=16, cex=0.5)#
+	lines(tmp$dage, tmp$'ct_reason == rstrTRUE', col=which(i==levels(natsal3$chltstwy)[-1]))#
+	arrows(x0=tmp$dage, #
+		y0 = tmp$'ct_reason == rstrTRUE' - tmp$'se.ct_reason == rstrTRUE', #
+		y1 = tmp$'ct_reason == rstrTRUE' + tmp$'se.ct_reason == rstrTRUE',#
+		col=which(i==levels(natsal3$chltstwy)[-1]),#
+		length=0.05, angle=90, code=3)#
+	}#
+legend(x='topright', legend=levels(natsal3$chltstwy)[-1], pch=1, col=1:length(levels(natsal3$chltstwy)[-1]), cex=0.75)
+##################################
+# reported chlamydia testing and diagnoses in natsal3#
+##################################
+#
+rm(list=ls())#
+#
+library(readstata13)#
+library(survey)#
+#
+##############################################
+# data section#
+##############################################
+#
+# full natsal dataset from ukda: 15162 rows#
+natsal3 <- read.dta13("~/Documents/data/natsal-3/UKDA-7799-stata11/stata11/eul_natsal_2010_for_archive.dta") #
+#
+# offered a chlamydia test in the last year?#
+natsal3$ct_offer <- NA#
+natsal3$ct_offer[natsal3$whnchlam == 1] <- 'Yes'#
+natsal3$ct_offer[natsal3$chlmtest == 1] <- 'Yes'#
+natsal3$ct_offer[natsal3$chlofref == 1] <- 'Yes'#
+# set up survey design#
+udesign <- svydesign(#
+  id = ~ psu_scrm,#
+  strata = ~ strata,#
+  data = natsal3,#
+  weight = ~ total_wt#
+) #
+#
+##############################################
+# plot answers to questions, by age#
+##############################################
+#
+quartz(width=14, height=14)#
+par(mfrow=c(2,2))#
+#
+chlamydia_tab <- svyby(~ chlamydia, by=~dage, design=udesign, svymean)#
+plot(chlamydia_tab$dage, chlamydia_tab[,2], type='l', col=1, xlim=c(16,40), xlab='Age/years', ylab='Proportion ever diagnosed with chlamydia')#
+lines(chlamydia_tab$dage, chlamydia_tab[,3], col=2)#
+lines(chlamydia_tab$dage, chlamydia_tab[,4], col=3)#
+lines(chlamydia_tab$dage, chlamydia_tab[,5], col=4)#
+lines(chlamydia_tab$dage, chlamydia_tab[,6], col=5)#
+legend(30, 0.14, legend=levels(natsal3$chlamydia), lty=rep(1,5), col=1:5, cex=0.8)#
+write.csv(chlamydia_tab, 'chlamydia_tab.csv', row.names=FALSE)#
+#
+whnchlam_tab <- svyby(~ whnchlam, by=~dage, design=udesign, svymean)#
+plot(whnchlam_tab$dage, whnchlam_tab[,2], type='l', col=1, xlim=c(16,40), ylim=c(0,0.08), xlab='Age/years', ylab='When last diagnosed with chlamydia')#
+lines(whnchlam_tab$dage, whnchlam_tab[,3], col=2)#
+lines(whnchlam_tab$dage, whnchlam_tab[,4], col=3)#
+lines(whnchlam_tab$dage, whnchlam_tab[,5], col=4)#
+lines(whnchlam_tab$dage, whnchlam_tab[,6], col=5)#
+lines(whnchlam_tab$dage, whnchlam_tab[,7], col=6)#
+legend(30, 0.08, legend=levels(natsal3$whnchlam), lty=rep(1,6), col=1:6, cex=0.8)#
+write.csv(whnchlam_tab, 'whnchlam_tab.csv', row.names=FALSE)#
+#
+chlmtest_tab <- svyby(~ chlmtest, by=~dage, design=udesign, svymean)#
+plot(chlmtest_tab$dage, chlmtest_tab[,2], type='l', col=1, xlim=c(16,40), ylim=c(0,1), xlab='Age/years', ylab='Chlamydia test in last year')#
+lines(chlmtest_tab$dage, chlmtest_tab[,3], col=2)#
+lines(chlmtest_tab$dage, chlmtest_tab[,4], col=3)#
+lines(chlmtest_tab$dage, chlmtest_tab[,5], col=4)#
+legend(16, 1, legend=levels(natsal3$chlmtest), lty=rep(1,5), col=1:5, cex=0.8)#
+write.csv(whnchlam_tab, 'whnchlam_tab.csv', row.names=FALSE)#
+#
+chlofref_tab <- svyby(~ chlofref, by=~dage, design=udesign, svymean)#
+plot(chlofref_tab$dage, chlofref_tab[,2], type='l', col=1, xlim=c(16,40), ylim=c(0,1), xlab='Age/years', ylab='Offered and refused test in last year')#
+lines(chlofref_tab$dage, chlofref_tab[,3], col=2)#
+lines(chlofref_tab$dage, chlofref_tab[,4], col=3)#
+lines(chlofref_tab$dage, chlofref_tab[,5], col=4)#
+legend(16, 1, legend=levels(natsal3$chlofref), lty=rep(1,5), col=1:5, cex=0.8)#
+write.csv(whnchlam_tab, 'whnchlam_tab.csv', row.names=FALSE)#
+#
+##############################################
+# flow of participants through questionnaire#
+##############################################
+#
+# diagnosis#
+natsal3$ct_d <- 0 # all participants (remains if not eligible for self-completion questionnaire)#
+natsal3$ct_d[natsal3$scelign3=='Yes'] <- 1 # eligible for scq (remains if never diagnosed with ct)#
+natsal3$ct_d[natsal3$ct_d==1 & !(natsal3$chlamydia %in% c('Not applicable', 'No'))] <- 2 # may have been diagnosed with ct, ever (remains if diagnosed >1 year ago, or unknown time)#
+natsal3$ct_d[natsal3$ct_d==2 & natsal3$whnchlam=='Less than 1 year ago'] <- 3#
+natsal3$ct_d <- factor(natsal3$ct_d)#
+#
+# testing#
+natsal3$ct_t <- 0 # all participants (remains if not eligible for self-completion questionnaire)#
+natsal3$ct_t[natsal3$scelign3=='Yes'] <- 1 # eligible for scq (remains if over 44)#
+natsal3$ct_t[natsal3$ct_t==1 & natsal3$dage<=44] <- 2 # aged under 44 (remains if had no partners, ever)#
+natsal3$ct_t[natsal3$ct_t==2 & natsal3$totlife !=0] <- 3 # aged under 44 and had at least one partner ever (remains if tested in last year, or didn't answer)#
+natsal3$ct_t[natsal3$ct_t==3 & natsal3$chlmtest %in% c('No','Not answered')] <- 4 # not tested in the last year (remains if offered test but refused)#
+natsal3$ct_t[natsal3$ct_t==4 & natsal3$chlofref %in% c('No','Not answered')] <- 5 # had not been offered a test, or didn't answer#
+natsal3$ct_t <- factor(natsal3$ct_t)#
+natsal3$ct_t_elig <- natsal3$ct_t %in% c(3,4,5)#
+natsal3$ct_t_off <- natsal3$ct_t %in% c(3,4)#
+natsal3$ct_reason <- natsal3$chltstwy#
+natsal3$ct_reason[natsal3$ct_reason == 'Not applicable'] <- natsal3$chtstwy1[natsal3$ct_reason == 'Not applicable']#
+natsal3$ct_reason <- factor(paste(natsal3$ct_t, natsal3$ct_reason))#
+#
+natsal3$ct_t_2 <- as.numeric(as.character(natsal3$ct_t))#
+natsal3$ct_t_2[natsal3$ct_reason == '3 I had symptoms'] <- 3.1#
+natsal3$ct_t_2[natsal3$ct_reason %in% c('3 I was notified because a partner was diagnosed with Chlamydia', '3 My partner had symptoms')] <- 3.2#
+natsal3$ct_t_2[natsal3$ct_reason %in% c('3 I had no symptoms but I was worried about the risk of Chlamydia', '3 I wanted a general sexual health check-up', '3 I was offered a routine test')] <- 3.3#
+udesign_td1644 <- svydesign(#
+  id = ~ psu_scrm,#
+  strata = ~ stratagrp,#
+  data =  natsal3[natsal3$dage <=44,],#
+  weight = ~ total_wt#
+)
+##############################################
+# how likely are people to get diagnosed at least once during the year?#
+##############################################
+#
+# proportion diagnosed in the last year, of those eligible for testing#
+tmp <- svyby(~ct_d == 3, by=~ dage + ct_t_elig, design=udesign_td1644, svymean)#
+tmp <- tmp[tmp$ct_t_elig,]#
+plot(tmp$dage, tmp$'ct_d == 3TRUE', xlab = 'age/years', ylab = 'Proportion diagnosed', ylim=c(0,0.15))#
+#lines(tmp$dage, tmp$'ct_d == 3TRUE')#
+arrows(tmp$dage, y0=tmp$'ct_d == 3TRUE'-tmp$'se.ct_d == 3TRUE', y1=tmp$'ct_d == 3TRUE'+tmp$'se.ct_d == 3TRUE', angle=90, code=3, length=0.05)#
+#
+# proportion diagnosed in the last year, of those tested#
+tmp <- svyby(~ct_d==3, by=~ dage + (ct_t==3), design=udesign_td1644, svymean)#
+tmp <- tmp[tmp$'ct_t == 3',]#
+points(tmp$dage, tmp$'ct_d == 3TRUE', col=2)#
+#lines(tmp$dage, tmp$'ct_d == 3TRUE', col=2)#
+arrows(tmp$dage, y0=tmp$'ct_d == 3TRUE' - tmp$'se.ct_d == 3TRUE', y1=tmp$'ct_d == 3TRUE' + tmp$'se.ct_d == 3TRUE', angle=90, code=3, length=0.05, col=2)#
+abline(v=17); text(x=17, y=0.15, 'Left compulsary education, last year', srt=90, adj=c(1,1))#
+abline(v=19); text(x=19, y=0.15, 'Left 16-18 education, last year', srt=90, adj=c(1,1))#
+abline(v=25); text(x=25, y=0.15, 'Left NCSP, last year', srt=90, adj=c(1,1))#
+legend(28, 0.14, c('Of all eligible','Of those tested'), pch=1, col=c(1,2))#
+#
+# proportion diagnosed, given tested for different reasons, last year#
+quartz(width=15, height=7)#
+plot(c(15,45), c(0,1), xlab = 'age/years', ylab = 'Proportion of those tested who were diagnosed', pch='')#
+for(i in levels(natsal3$chltstwy)[-1]){ # don't do the 'Not applicable's#
+	rstr <- paste(3, as.character(i)) # string for reason#
+	tmp <- svyby(~ct_d==3, by=~ dage + (ct_reason==rstr), design=udesign_td1644, svymean)#
+	tmp <- tmp[tmp$'ct_reason == rstr',]#
+	points(tmp$dage, tmp$'ct_d == 3TRUE', col=which(i==levels(natsal3$chltstwy)[-1]), pch=16, cex=0.5)#
+	lines(tmp$dage, tmp$'ct_d == 3TRUE', col=which(i==levels(natsal3$chltstwy)[-1]))#
+	# arrows(x0=tmp$dage, #
+		# y0 = tmp$'ct_d == 3TRUE' - tmp$'se.ct_d == 3TRUE', #
+		# y1 = tmp$'ct_d == 3TRUE' + tmp$'se.ct_d == 3TRUE',#
+		# col=which(i==levels(natsal3$chltstwy)[-1]),#
+		# length=0.05, angle=90, code=3)#
+	}#
+legend(25, 1, legend=levels(natsal3$chltstwy)[-1], pch=1, col=1:length(levels(natsal3$chltstwy)[-1]), cex=0.75)
+1436.4189 - 187.15^2
+1436.4189/25 - (187.15/25)^2
+1436.4189 - 187.15^2/25
+6.52+6.96+7.37+6.85+7.89
+35.59^2+44.15^2+31.44^2+31.88^2+44.09^2
+/5
+7164.607/5
+1436.4189-1432.921
+35.414-3.4979
+3.4979/4
+31.9161/20
+35.414/24
+8.21+5.64+6.52+8.80+6.18
+8.55+9.12+5.97+6.63+6.96
+6.06+7.37+8.58+6.11+8.95
+6.34+8.82+6.70+6.85+8.87
+8.21+8.55+6.06+6.34+7.89
+5.64+9.12+7.37+8.82+6.84
+6.52+5.97+8.58+6.70+9.03
+8.80+6.63+6.11+6.85+9.31
+6.18+6.96+8.95+8.87+6.85
+0.2*(35.35^2+37.23^2+37.07^2+37.58^2) - (187.15^2)/25
+6.18+6.96+8.95+8.87+6.85
+0.2*(35.35^2+37.23^2+37.07^2+37.58^2+37.81^2) - (187.15^2)/25
+7.89+6.84+9.03+9.31+6.85
+0.2*(35.35^2+37.23^2+37.07^2+37.58^2+39.92^2) - (187.15^2)/25
+0.2*(37.05^2+37.79^2+36.80^2+37.70^2+37.81^2) - (187.15^2)/25
+0.2*(35.59^2+44.15^2+31.44^2+31.88^2+44.09^2) - (187.15^2)/25
+35.414-(0.17764+2.14372+31.91644)
+0.17764/4
+2.14372/4
+31.91644/4
+1.1762/12
+0.04441/0.09801667
+0.53593/0.09801667
+7.97911/0.09801667
+31.88-44.09
+12.21/5
+2*sqrt(0.09801667)/5
+2.44 + 2.179*0.1252305
+2.44 - 2.179*0.1252305
+sqrt(2*0.09801667/5)
+2.44 + 2.179*0.1980067
+2.44 - 2.179*0.1980067
+34+26+27
+39+37+24
+44+41+41
+38+35+48
+34=39+44+38
+34+39+44+38
+26+37+41+35
+27+24+41+48
+155+139+140
+8202-(434^2/24)
+(155^2+139^2+140^2)/8 - (434^2/24)
+(87^2+100^2+126^2+121^2)/6 - (434^2/24)
+(34^2+26^2+27^2+39^2+37^2+24^2+44^2+41^2+4162+38^2+35^2+48^2)/6 - (434^2/24)
+(34^2+26^2+27^2+39^2+37^2+24^2+44^2+41^2+4162+38^2+35^2+48^2)/2 - (434^2/24)
+(34^2+26^2+27^2+39^2+37^2+24^2+44^2+41^2+41^2+38^2+35^2+48^2)/2 - (434^2/24)
+300.8333-166.1667-20.08333
+166.1667/3
+20.08333/2
+114.5833/6
+53/12
+55.3889/4.416667
+10.04167/4.416667
+19.09722/4.416667
+0.36/14
+100*0.36/14
+2/14
+3/14
+0.16*14
+2/14
+3/14
+0.36*14
+5/14
+6/14
+0.16/115
+0.16*115
+18/115
+19/115
+115-18
+13/365
+0.045*365.25
+4*7/365.25
+365.25/12
+1/12
+7/365.25
+1/0.045
+mean(c(5,8))
+7*mean(c(5,8))/365
+7*mean(c(5,8))/365.25
+mean(c(2,7))
+mean(c(2,7))/365
+1/0.012
+18+97
+38+91
+23+106
+sqrt(43*112)
+sqrt(43*112)/365
+7*4/365
+7/365
+2*7/365
+3*7/365
+4*7/365
+365/2
+log(7)
+log(8.5)
+log(21)
+8.5/365
+####################################
+# Run STAN model chlamydia_two_exponentials.stan using the R interface#
+####################################
+#
+library(rstan)#
+#
+#####################
+# data#
+#####################
+# duration#
+# study order#
+# 1 Handsfield 1976#
+# 2 Prentice 1976#
+# 3 Johannisson (1979) 3,4#
+# 4 Paavonen (1980) 1, 2, 3, 4#
+# 5 Joyner 2002#
+# 6 Geisler 2008#
+# 7 Stamm 1986#
+# 8 van den Brule 2002	#
+#
+chlamydia_dat <- list(#
+	studnum = 8,#
+	studnum_bytype = c(6,2,0),#
+	studobs = c(1,1,4,1,5,1,1,4),#
+	cumobs = c(0,cumsum(c(1,1,4,1,5,1,1))),#
+	Nobs = sum(c(1,1,4,1,5,1,1,4)),#
+	r = c( # number who cleared infection at each time point#
+		0,#
+		4, #
+		3,13,3,2,#
+		7,#
+		3,2,1,0,1#
+		5,#
+		1,0,0,0#
+		1#
+		),#
+	n = c( # number tested at each time point#
+		10,#
+		13,#
+		17,27,6,2#
+		21,#
+		15, 9, 4, 4, 4,#
+		14,#
+		5, 2, 2, 1,#
+		9#
+		), #
+	t = c(#
+		0.019,#
+		0.023, #
+		0.019, 0.038, 0.058, 0.077, #
+		0.077,#
+		0.012, 0.030, 0.049, 0.088, 0.190,#
+		0.045,#
+		0.019, 0.038, 0.058, 0.077,#
+		0.5#
+		), #
+	seind = c( # did the study use culture as opposed to NAATs?#
+		1,#
+		1,#
+		1, 1, 1, 1,#
+		1,#
+		0,0,0,0,0,#
+		0,#
+		1,1,1,1,#
+		0#
+		), #
+	T = rep(999, times=sum(c(1,1,4,1,5,1,1,4)))#
+	)
+chlamydia_dat <- list(#
+	studnum = 8,#
+	studnum_bytype = c(6,2,0),#
+	studobs = c(1,1,4,1,5,1,1,4),#
+	cumobs = c(0,cumsum(c(1,1,4,1,5,1,1))),#
+	Nobs = sum(c(1,1,4,1,5,1,1,4)),#
+	r = c( # number who cleared infection at each time point#
+		0,#
+		4, #
+		3,13,3,2,#
+		7,#
+		3,2,1,0,1,#
+		5,#
+		1,0,0,0#
+		1#
+		),#
+	n = c( # number tested at each time point#
+		10,#
+		13,#
+		17,27,6,2,#
+		21,#
+		15, 9, 4, 4, 4,#
+		14,#
+		5, 2, 2, 1,#
+		9#
+		), #
+	t = c(#
+		0.019,#
+		0.023, #
+		0.019, 0.038, 0.058, 0.077, #
+		0.077,#
+		0.012, 0.030, 0.049, 0.088, 0.190,#
+		0.045,#
+		0.019, 0.038, 0.058, 0.077,#
+		0.5#
+		), #
+	seind = c( # did the study use culture as opposed to NAATs?#
+		1,#
+		1,#
+		1, 1, 1, 1,#
+		1,#
+		0,0,0,0,0,#
+		0,#
+		1,1,1,1,#
+		0#
+		), #
+	T = rep(999, times=sum(c(1,1,4,1,5,1,1,4)))#
+	)
+chlamydia_dat <- list(#
+	studnum = 8,#
+	studnum_bytype = c(6,2,0),#
+	studobs = c(1,1,4,1,5,1,1,4),#
+	cumobs = c(0,cumsum(c(1,1,4,1,5,1,1))),#
+	Nobs = sum(c(1,1,4,1,5,1,1,4)),#
+	r = c( # number who cleared infection at each time point#
+		0,#
+		4, #
+		3,13,3,2,#
+		7,#
+		3,2,1,0,1,#
+		5,#
+		1,0,0,0,#
+		1#
+		),#
+	n = c( # number tested at each time point#
+		10,#
+		13,#
+		17,27,6,2,#
+		21,#
+		15, 9, 4, 4, 4,#
+		14,#
+		5, 2, 2, 1,#
+		9#
+		), #
+	t = c(#
+		0.019,#
+		0.023, #
+		0.019, 0.038, 0.058, 0.077, #
+		0.077,#
+		0.012, 0.030, 0.049, 0.088, 0.190,#
+		0.045,#
+		0.019, 0.038, 0.058, 0.077,#
+		0.5#
+		), #
+	seind = c( # did the study use culture as opposed to NAATs?#
+		1,#
+		1,#
+		1, 1, 1, 1,#
+		1,#
+		0,0,0,0,0,#
+		0,#
+		1,1,1,1,#
+		0#
+		), #
+	T = rep(999, times=sum(c(1,1,4,1,5,1,1,4)))#
+	)
+#####################
+# initial values#
+#####################
+#
+# Initial values - 0#
+init0 <- list(psi = 7/77, lambda_slow = 0.74, p1 = 0.23)#
+#
+# Initial values - 1#
+init1 <- list(psi = 0.9, lambda_slow = 0.7, p1 = 0.2)#
+#
+# Initial values - 2#
+init2 <- list(psi = 0.6, lambda_slow = 0.1, p1 = 0.5)
+#####################
+# run the model#
+#####################
+#
+fit <- stan(file = '~/Documents/ct_trends/ct_surveillance/stan/chlamydia_two_exponentials.stan', data = chlamydia_dat, #
+            iter = 22000, warmup = 2000, init=list(init0), chains = 1, seed=12345,#
+            sample_file = '~/Documents/ct_trends/ct_surveillance/stan/chlamydia_two_exponentials_men_init0_260516')
+####################################
+# Run STAN model chlamydia_two_exponentials.stan using the R interface#
+####################################
+#
+library(rstan)
+#####################
+# data#
+#####################
+# duration#
+# study order#
+# 1 Handsfield 1976#
+# 2 Prentice 1976#
+# 3 Johannisson (1979) 3,4#
+# 4 Paavonen (1980) 1, 2, 3, 4#
+# 5 Joyner 2002#
+# 6 Geisler 2008#
+# 7 Stamm 1986#
+# 8 van den Brule 2002	#
+#
+chlamydia_dat <- list(#
+	studnum = 8,#
+	studnum_bytype = c(6,2,0),#
+	studobs = c(1,1,4,1,5,1,1,4),#
+	cumobs = c(0,cumsum(c(1,1,4,1,5,1,1))),#
+	Nobs = sum(c(1,1,4,1,5,1,1,4)),#
+	r = c( # number who cleared infection at each time point#
+		0,#
+		4, #
+		3,13,3,2,#
+		7,#
+		3,2,1,0,1,#
+		5,#
+		1,0,0,0,#
+		1#
+		),#
+	n = c( # number tested at each time point#
+		10,#
+		13,#
+		17,27,6,2,#
+		21,#
+		15, 9, 4, 4, 4,#
+		14,#
+		5, 2, 2, 1,#
+		9#
+		), #
+	t = c(#
+		0.019,#
+		0.023, #
+		0.019, 0.038, 0.058, 0.077, #
+		0.077,#
+		0.012, 0.030, 0.049, 0.088, 0.190,#
+		0.045,#
+		0.019, 0.038, 0.058, 0.077,#
+		0.5#
+		), #
+	seind = c( # did the study use culture as opposed to NAATs?#
+		1,#
+		1,#
+		1, 1, 1, 1,#
+		1,#
+		0,0,0,0,0,#
+		0,#
+		1,1,1,1,#
+		0#
+		), #
+	T = rep(999, times=sum(c(1,1,4,1,5,1,1,4)))#
+	)
+#####################
+# initial values#
+#####################
+#
+# Initial values - 0#
+init0 <- list(psi = 7/77, lambda_slow = 0.74, p1 = 0.23)#
+#
+# Initial values - 1#
+init1 <- list(psi = 0.9, lambda_slow = 0.7, p1 = 0.2)#
+#
+# Initial values - 2#
+init2 <- list(psi = 0.6, lambda_slow = 0.1, p1 = 0.5)
+#####################
+# run the model#
+#####################
+#
+fit <- stan(file = '~/Documents/ct_natural_history/ct_surveillance/stan/chlamydia_two_exponentials_men.stan', data = chlamydia_dat, #
+            iter = 22000, warmup = 2000, init=list(init0), chains = 1, seed=12345,#
+            sample_file = '~/Documents/ct_natural_history/ct_surveillance/stan/chlamydia_two_exponentials_men_init0_260516')
+#####################
+# plots#
+#####################
+#
+op <- extract(fit)#
+plot(op$lp__, type='l', col=rgb(0,0,0,0.1))
+pairs(~lp__+lambda_slow+p1+psi,data=op, col=rgb(0,0,0,0.1), pch=16, cex=0.1)
+hist(op$lambda_slow)
+hist(op$p1)
+mean(op$lambda_slow)#
+quantile(op$lambda_slow, p=c(0.025, 0.5, 0.975))#
+mean(op$p1)#
+quantile(op$p1, p=c(0.025, 0.5, 0.975))
+# how do estimates of mean and centiles change with increasing number of samples?#
+centiles <- matrix(nrow=20000, ncol=3)#
+mean <- matrix(20000, ncol=1)#
+for(i in 1:20000){#
+	centiles[i,] <- quantile(op$lambda_slow[1:i], p=c(0.025, 0.5, 0.975), na.rm=TRUE)#
+	mean[i] <- mean(op$lambda_slow[1:i], na.rm=TRUE)#
+}#
+plot(centiles[,1], type='l', ylim=c(0.6, 1))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')
+# how do estimates of mean and centiles change with increasing number of samples?#
+centiles <- matrix(nrow=20000, ncol=3)#
+mean <- matrix(20000, ncol=1)#
+for(i in 1:20000){#
+	centiles[i,] <- quantile(op$lambda_slow[1:i], p=c(0.025, 0.5, 0.975), na.rm=TRUE)#
+	mean[i] <- mean(op$lambda_slow[1:i], na.rm=TRUE)#
+}#
+plot(centiles[,1], type='l', ylim=c(0, 1.5))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2) #
+#
+write.csv(#
+	data.frame(lambda_slow = op$lambda_slow[10001:20000], #
+		p_fast = op$p1[10001:20000]#
+		),#
+	file='chlamydia_two_exponentials_init0_130516.csv', row.names=FALSE)
+plot(centiles[,1], type='l', ylim=c(0.6, 1))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')
+plot(centiles[,1], type='l', ylim=c(0, 1.5))
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+source("/Users/Joanna/Documents/ct_natural_history/ct_surveillance/stan/run_chlamydia_two_exponentials_men.R")
+ls(op)
+length(op$lambda_slow)
+hist(op$theta[,1])
+hist(op$theta[,2])
+hist(op$theta[,3])
+mean(op$lambda_slow)#
+quantile(op$lambda_slow, p=c(0.025, 0.5, 0.975))#
+mean(op$p1)#
+quantile(op$p1, p=c(0.025, 0.5, 0.975))
+source("/Users/Joanna/Documents/ct_natural_history/ct_surveillance/stan/run_chlamydia_two_exponentials_men.R")
+####################################
+# Run STAN model chlamydia_two_exponentials.stan using the R interface#
+# Based on Supplementary Web Appendix 1 to:#
+# Malcolm J. Price, A. E. Ades, Daniela De Angelis, Nicky J. Welton, John Macleod, Kate Soldan, Katy Turner, Ian Simms and Paddy J. Horner#
+# Mixture-of-exponentials models to explain heterogeneity in studies of the duration of Chlamydia trachomatis infection.#
+# Statistics in Medicine 32:1547–1560 (2013)#
+####################################
+#
+rm(list=ls())#
+#
+library(rstan)#
+#
+#####################
+# data#
+#####################
+# duration#
+# study order#
+# 1 Johhanisson#
+# 2 Joyner#
+# 3 Geisler#
+# 4 Paavonen	#
+# 5 Rahm#
+# 6 Sorensen#
+# 7 McCormack	#
+# 8 Morre	#
+# 9 Mollano#
+#
+chlamydia_dat <- list(#
+	studnum = 9,#
+	studnum_bytype = c(4,3,2),#
+	studobs = c(4,5,1,1,3,1,1,5,4),#
+	cumobs = c(0,cumsum(c(4,5,1,1,3,1,1,5))),#
+	Nobs = sum(4,5,1,1,3,1,1,5,4),#
+	r = c(10,7,6,6, #
+		2,7,1,0,3, #
+		23,#
+		3, #
+		17,0,0,#
+		8, #
+		3, #
+		2,2,4,0,2,#
+		44,23,7,2),#
+	n = c(#
+		23,14,14,8,#
+		12,28,4,8,6, #
+		129, #
+		15, #
+		93,1,1, #
+		13, #
+		7, #
+		20,5,15,1,13, #
+		82,37,14,6), #
+	t = c(#
+		0.038,0.058,0.077,0.125, #
+		0.012,0.03,0.049,0.088,0.274,  #
+		0.045, #
+		0.083, #
+		0.25,0.5,0.75,#
+		1,#
+		1.375, #
+		0.083,0.5,0.417,0.917,0.5, #
+		1,1,1,1), #
+	seind = c(#
+		1,1,1,1, #
+		0,0,0,0,0, #
+		0,#
+		1, #
+		1,1,1,#
+		0, #
+		1, #
+		0,0,0,0,0,#
+		0,0,0,0), #
+	T = c( #
+		999,999,999,999, #
+		999,999,999,999,999, #
+		999,#
+		999, #
+		999,999,999,#
+		999, #
+		999, #
+		0,0,0.083,0.083,0.5, #
+		0,1,2,3#
+		)#
+	)
+#####################
+# initial values#
+#####################
+#
+# Initial values - 0#
+init0 <- list(psi = 7/77, lambda_slow = 0.74, p1 = 0.23)#
+#
+# Initial values - 1#
+init1 <- list(psi = 0.9, lambda_slow = 0.7, p1 = 0.2)#
+#
+# Initial values - 2#
+init2 <- list(psi = 0.6, lambda_slow = 0.1, p1 = 0.5)
+#####################
+# run the model#
+#####################
+#
+fit <- stan(file = 'chlamydia_two_exponentials.stan', data = chlamydia_dat, #
+            iter = 22000, warmup = 2000, init=list(init0, init1, init2), chains = 3, seed=12345,#
+            sample_file = 'chlamydia_two_exponentials_men.csv')
+#####################
+# run the model#
+#####################
+#
+fit <- stan(file = 'chlamydia_two_exponentials_women.stan', data = chlamydia_dat, #
+            iter = 22000, warmup = 2000, init=list(init0, init1, init2), chains = 3, seed=12345,#
+            sample_file = 'chlamydia_two_exponentials_women.csv')
+fit <- stan(file = 'chlamydia_two_exponentials_women.stan', data = chlamydia_dat, #
+            iter = 22000, warmup = 2000, init=list(init0, init1, init2), chains = 3, seed=12345#
+            )
+#####################
+# plots#
+#####################
+#
+op <- extract(fit)#
+plot(op$lp__, type='l', col=rgb(0,0,0,0.1))#
+pairs(~lp__+lambda_slow+p1+psi,data=op, col=rgb(0,0,0,0.1), pch=16, cex=0.1)#
+hist(op$lambda_slow)#
+hist(op$p1)#
+#
+mean(op$lambda_slow)#
+quantile(op$lambda_slow, p=c(0.025, 0.5, 0.975))#
+mean(op$p1)#
+quantile(op$p1, p=c(0.025, 0.5, 0.975))#
+#
+# how do estimates of mean and centiles change with increasing number of samples?#
+centiles <- matrix(nrow=20000, ncol=3)#
+mean <- matrix(20000, ncol=1)#
+for(i in 1:20000){#
+	centiles[i,] <- quantile(op$lambda_slow[1:i], p=c(0.025, 0.5, 0.975), na.rm=TRUE)#
+	mean[i] <- mean(op$lambda_slow[1:i], na.rm=TRUE)#
+}#
+plot(centiles[,1], type='l', ylim=c(0.6, 1))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+ls(op)
+length(op$lambda_slow)
+20000-3333
+write.csv(#
+	data.frame(lambda_slow = op$lambda_slow[c(16668:20000, 36668:40000, 56667:60000)], #
+		p_fast = op$p1[c(16668:20000, 36668:40000, 56667:60000)]#
+		),#
+	file='chlamydia_two_exponentials_women.csv', row.names=FALSE)
+source("/Users/Joanna/Documents/papers/ct_surveillance/ct_surveillance/stan/run_chlamydia_two_exponentials_women.R")
+####################################
+# Run STAN model chlamydia_two_exponentials_men.stan using the R interface#
+# Model based on:#
+# Malcolm J. Price, A. E. Ades, Daniela De Angelis, Nicky J. Welton, John Macleod, Kate Soldan, Katy Turner, Ian Simms and Paddy J. Horner#
+# Mixture-of-exponentials models to explain heterogeneity in studies of the duration of Chlamydia trachomatis infection.#
+# Statistics in Medicine 32:1547–1560 (2013)#
+####################################
+#
+rm(list=ls())#
+#
+library(rstan)
+#####################
+# data#
+#####################
+# duration#
+# study order#
+# 1 Handsfield 1976#
+# 2 Prentice 1976#
+# 3 Johannisson 1979#
+# 4 Paavonen 1980#
+# 5 Joyner 2002#
+# 6 Geisler 2008#
+# 7 Stamm 1986#
+# 8 van den Brule 2002	#
+#
+chlamydia_dat <- list(#
+	studnum = 8,#
+	studnum_bytype = c(6,2,0),#
+	studobs = c(1,1,4,1,5,1,1,4),#
+	cumobs = c(0,cumsum(c(1,1,4,1,5,1,1))),#
+	Nobs = sum(c(1,1,4,1,5,1,1,4)),#
+	r = c( # number who cleared infection at each time point#
+		0,#
+		4, #
+		3,13,3,2,#
+		7,#
+		3,2,1,0,1,#
+		5,#
+		1,0,0,0,#
+		1#
+		),#
+	n = c( # number tested at each time point#
+		10,#
+		13,#
+		17,27,6,2,#
+		21,#
+		15, 9, 4, 4, 4,#
+		14,#
+		5, 2, 2, 1,#
+		9#
+		), #
+	t = c(#
+		0.019,#
+		0.023, #
+		0.019, 0.038, 0.058, 0.077, #
+		0.077,#
+		0.012, 0.030, 0.049, 0.088, 0.190,#
+		0.045,#
+		0.019, 0.038, 0.058, 0.077,#
+		0.5#
+		), #
+	seind = c( # did the study use culture as opposed to NAATs?#
+		1,#
+		1,#
+		1, 1, 1, 1,#
+		1,#
+		0,0,0,0,0,#
+		0,#
+		1,1,1,1,#
+		0#
+		), #
+	T = rep(999, times=sum(c(1,1,4,1,5,1,1,4)))#
+	)
+#####################
+# initial values#
+#####################
+#
+# Initial values - 0#
+init0 <- list(psi = 7/77, lambda_slow = 0.74, p1 = 0.23)#
+#
+# Initial values - 1#
+init1 <- list(psi = 0.9, lambda_slow = 0.7, p1 = 0.2)#
+#
+# Initial values - 2#
+init2 <- list(psi = 0.6, lambda_slow = 0.1, p1 = 0.5)
+#####################
+# run the model#
+#####################
+#
+fit <- stan(file = 'chlamydia_two_exponentials_men.stan', data = chlamydia_dat, #
+            iter = 22000, warmup = 2000, init=list(init0, init1, init2), chains = 3, seed=12345#
+            )
+#####################
+# plots#
+#####################
+#
+op <- extract(fit)#
+plot(op$lp__, type='l', col=rgb(0,0,0,0.1))#
+pairs(~lp__+lambda_slow+p1+psi,data=op, col=rgb(0,0,0,0.1), pch=16, cex=0.1)#
+hist(op$lambda_slow)#
+hist(op$p1)#
+#
+mean(op$lambda_slow)#
+quantile(op$lambda_slow, p=c(0.025, 0.5, 0.975))#
+mean(op$p1)#
+quantile(op$p1, p=c(0.025, 0.5, 0.975))#
+#
+# how do estimates of mean and centiles change with increasing number of samples?#
+centiles <- matrix(nrow=20000, ncol=3)#
+mean <- matrix(20000, ncol=1)#
+for(i in 1:20000){#
+	centiles[i,] <- quantile(op$lambda_slow[1:i], p=c(0.025, 0.5, 0.975), na.rm=TRUE)#
+	mean[i] <- mean(op$lambda_slow[1:i], na.rm=TRUE)#
+}#
+plot(centiles[,1], type='l', ylim=c(0, 1.5))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+#####################
+# write to csv file (choose last 3333 or 3334 samples from each chain)#
+#####################
+#
+write.csv(#
+	data.frame(lambda_slow = op$lambda_slow[c(16668:20000, 36668:40000, 56667:60000)], #
+		p_fast = op$p1[c(16668:20000, 36668:40000, 56667:60000)]#
+		),#
+	file='chlamydia_two_exponentials_men.csv', row.names=FALSE)
+####################################
+# Run STAN model chlamydia_two_exponentials_men.stan using the R interface#
+# Model based on:#
+# Malcolm J. Price, A. E. Ades, Daniela De Angelis, Nicky J. Welton, John Macleod, Kate Soldan, Katy Turner, Ian Simms and Paddy J. Horner#
+# Mixture-of-exponentials models to explain heterogeneity in studies of the duration of Chlamydia trachomatis infection.#
+# Statistics in Medicine 32:1547–1560 (2013)#
+####################################
+#
+rm(list=ls())#
+#
+library(rstan)#
+#
+#####################
+# data#
+#####################
+# duration#
+# study order#
+# 1 Handsfield 1976#
+# 2 Prentice 1976#
+# 3 Johannisson 1979#
+# 4 Paavonen 1980#
+# 5 Joyner 2002#
+# 6 Geisler 2008#
+# 7 Stamm 1986#
+# 8 van den Brule 2002	#
+#
+chlamydia_dat <- list(#
+	studnum = 8,#
+	studnum_bytype = c(6,2,0),#
+	studobs = c(1,1,4,1,5,1,1,4),#
+	cumobs = c(0,cumsum(c(1,1,4,1,5,1,1))),#
+	Nobs = sum(c(1,1,4,1,5,1,1,4)),#
+	r = c( # number who cleared infection at each time point#
+		0,#
+		4, #
+		3,13,3,2,#
+		7,#
+		3,2,1,0,1,#
+		5,#
+		1,0,0,0,#
+		1#
+		),#
+	n = c( # number tested at each time point#
+		10,#
+		13,#
+		17,27,6,2,#
+		21,#
+		15, 9, 4, 4, 4,#
+		14,#
+		5, 2, 2, 1,#
+		9#
+		), #
+	t = c(#
+		0.019,#
+		0.023, #
+		0.019, 0.038, 0.058, 0.077, #
+		0.077,#
+		0.012, 0.030, 0.049, 0.088, 0.190,#
+		0.045,#
+		0.019, 0.038, 0.058, 0.077,#
+		0.5#
+		), #
+	seind = c( # did the study use culture as opposed to NAATs?#
+		1,#
+		1,#
+		1, 1, 1, 1,#
+		1,#
+		0,0,0,0,0,#
+		0,#
+		1,1,1,1,#
+		0#
+		), #
+	T = rep(999, times=sum(c(1,1,4,1,5,1,1,4)))#
+	)
+plot(chlamydia_dat$t, chlamydia_dat$r/chlamydia_dat$n)
+plot(chlamydia_dat$t, chlamydia_dat$r/chlamydia_dat$n, xlab = 'Mean follow-up time (years)', ylab= 'Proportion cleared infection')
+plot(chlamydia_dat$t, chlamydia_dat$r/chlamydia_dat$n, xlab = 'Mean follow-up time (years)', ylab= 'Proportion cleared infection', log='x')
+plot(chlamydia_dat$t, chlamydia_dat$r/chlamydia_dat$n, pch = rep(1:8, each = chlamydia_dat$studobs) , xlab = 'Mean follow-up time (years)', ylab= 'Proportion cleared infection', log='x')
+rep(1:8, each = chlamydia_dat$studobs)
+rep(1:8, times = chlamydia_dat$studobs)
+plot(chlamydia_dat$t, chlamydia_dat$r/chlamydia_dat$n, pch = rep(1:8, times = chlamydia_dat$studobs) , xlab = 'Mean follow-up time (years)', ylab= 'Proportion cleared infection', log='x')
+legend('topleft', pch=1:8, legend=1:8)
+library(lattice)
+xyplot(chlamydia_dat$r/chlamydia_dat$n ~ chlamydia_dat$t | rep(1:8, times = chlamydia_dat$studobs))
+study_names <- c("Handsfield 1976", "Prentice 1976", "Johannisson 1979", "Paavonen 1980", "Joyner 2002", "Geisler 2008", "Stamm 1986", "van den Brule 2002")
+xyplot(chlamydia_dat$r/chlamydia_dat$n ~ chlamydia_dat$t | rep(study_names, times = chlamydia_dat$studobs))
+xyplot(chlamydia_dat$r/chlamydia_dat$n ~ chlamydia_dat$t | rep(study_names, times = chlamydia_dat$studobs), log='x')
+xyplot(chlamydia_dat$r/chlamydia_dat$n ~ chlamydia_dat$t | rep(study_names, times = chlamydia_dat$studobs), logx=TRUE)
+xyplot(chlamydia_dat$r/chlamydia_dat$n ~ chlamydia_dat$t | rep(study_names, times = chlamydia_dat$studobs), layout=c(8,1))
+xyplot(chlamydia_dat$r/chlamydia_dat$n ~ chlamydia_dat$t | rep(study_names, times = chlamydia_dat$studobs), layout=c(1,8))
+quartz(width=4, height=12)
+xyplot(chlamydia_dat$r/chlamydia_dat$n ~ chlamydia_dat$t | rep(study_names, times = chlamydia_dat$studobs), layout=c(1,8))
+quartz(width=4, height=12)#
+xyplot(chlamydia_dat$r/chlamydia_dat$n ~ chlamydia_dat$t | rep(study_names, times = chlamydia_dat$studobs), layout=c(1,8))
+quartz(width=4, height=12)#
+xyplot(#
+	chlamydia_dat$r/chlamydia_dat$n ~ chlamydia_dat$t | rep(study_names, times = chlamydia_dat$studobs), #
+	layout=c(1,8),#
+	xlab = 'Mean follow-up time (years)', #
+	ylab= 'Proportion cleared infection'#
+	)
+source("/Users/Joanna/Documents/papers/ct_surveillance/ct_surveillance/stan/run_chlamydia_two_exponentials_men.R")
+source("/Users/Joanna/Documents/papers/ct_surveillance/ct_surveillance/stan/run_chlamydia_two_exponentials_men.R")
+source("/Users/Joanna/Documents/papers/ct_surveillance/ct_surveillance/stan/run_chlamydia_two_exponentials_men.R")
+#####################
+# plots#
+#####################
+#
+op <- extract(fit)#
+plot(op$lp__, type='l', col=rgb(0,0,0,0.1))#
+pairs(~lp__+lambda_slow+p1+psi,data=op, col=rgb(0,0,0,0.1), pch=16, cex=0.1)#
+hist(op$lambda_slow)#
+hist(op$p1)
+#####################
+# plots#
+#####################
+#
+op <- extract(fit)#
+plot(op$lp__, type='l', col=rgb(0,0,0,0.1))#
+pairs(~lp__+lambda_slow+p1+psi,data=op, col=rgb(0,0,0,0.1), pch=16, cex=0.1)#
+hist(op$lambda_slow)#
+hist(op$p1)#
+#
+mean(op$lambda_slow)#
+quantile(op$lambda_slow, p=c(0.025, 0.5, 0.975))#
+mean(op$p1)#
+quantile(op$p1, p=c(0.025, 0.5, 0.975))
+# how do estimates of mean and centiles change with increasing number of samples?#
+centiles <- matrix(nrow=20000, ncol=3)#
+mean <- matrix(20000, ncol=1)#
+for(i in 1:20000){#
+	centiles[i,] <- quantile(op$lambda_slow[1:i], p=c(0.025, 0.5, 0.975), na.rm=TRUE)#
+	mean[i] <- mean(op$lambda_slow[1:i], na.rm=TRUE)#
+}#
+plot(centiles[,1], type='l', ylim=c(0, 1.5))#
+lines(centiles[,2])#
+lines(centiles[,3])#
+lines(mean, col='red')#
+#
+abline(h=0.61, lty=2) #
+abline(h=0.74, lty=2)#
+abline(h=0.89, lty=2)
+quartz(width=4, height=12)#
+xyplot(#
+	chlamydia_dat$r/chlamydia_dat$n ~ chlamydia_dat$t | rep(study_names, times = chlamydia_dat$studobs), #
+	layout=c(1,8),#
+	xlab = 'Mean follow-up time (years)', #
+	ylab= 'Proportion cleared infection'#
+	)
+study_names <- c("Handsfield 1976", "Prentice 1976", "Johannisson 1979", "Paavonen 1980", "Joyner 2002", "Geisler 2008", "Stamm 1986", "van den Brule 2002")
+xyplot(#
+	chlamydia_dat$r/chlamydia_dat$n ~ chlamydia_dat$t | rep(study_names, times = chlamydia_dat$studobs), #
+	layout=c(1,8),#
+	xlab = 'Mean follow-up time (years)', #
+	ylab= 'Proportion cleared infection'#
+	)
+ls(op)
+head(op$r_sim)
+apply(op$r_sim,2,quantile,p=0.025)
+apply(op$r_sim,2,quantile,p=0.975)
+apply(op$r_sim,2,quantile,p=0.025)/chlamydia_dat$n
+apply(op$r_sim,2,quantile,p=0.975)/chlamydia_dat$n
+chlamydia_dat$r/chlamydia_dat$n
+rbind(
+apply(op$r_sim,2,quantile,p=0.025)/chlamydia_dat$n,
+chlamydia_dat$r/chlamydia_dat$n,
+apply(op$r_sim,2,quantile,p=0.975)/chlamydia_dat$n
+)
+plot(chlamydia_dat$t, chlamydia_dat$r/chlamydia_dat$n, pch=16, col=rep(study_names, times = chlamydia_dat$studobs)
+)
+plot(chlamydia_dat$t, chlamydia_dat$r/chlamydia_dat$n, pch=16, col=rep(1:8, times = chlamydia_dat$studobs))
+plot(chlamydia_dat$t, chlamydia_dat$r/chlamydia_dat$n, pch=16, col=rep(1:8, times = chlamydia_dat$studobs), log='x')
+c2.5 <- apply(op$r_sim,2,quantile,p=0.025)/chlamydia_dat$n
+c97.5 <- apply(op$r_sim,2,quantile,p=0.975)/chlamydia_dat$n
+arrows(chlamydia_dat$t, y0 = apply(op$r_sim,2,quantile,p=0.025)/chlamydia_dat$n, y1 = apply(op$r_sim,2,quantile,p=0.975)/chlamydia_dat$n, col = rep(1:8, times = chlamydia_dat$studobs))
+arrows(chlamydia_dat$t, y0 = apply(op$r_sim,2,quantile,p=0.025)/chlamydia_dat$n, y1 = apply(op$r_sim,2,quantile,p=0.975)/chlamydia_dat$n, col = rep(1:8, times = chlamydia_dat$studobs), code=3, angle=90, length = 0.1)
+plot(chlamydia_dat$t, chlamydia_dat$r/chlamydia_dat$n, pch=16, col=rep(1:8, times = chlamydia_dat$studobs), log='x')#
+arrows(chlamydia_dat$t, y0 = apply(op$r_sim,2,quantile,p=0.025)/chlamydia_dat$n, y1 = apply(op$r_sim,2,quantile,p=0.975)/chlamydia_dat$n, col = rep(1:8, times = chlamydia_dat$studobs), code=3, angle=90, length = 0.1)
+legend('topleft', col=1:8, pch=16, legend=study_names)
+c2.5 <- apply(op$r_sim,2,quantile,p=0.025)/chlamydia_dat$n#
+c97.5 <- apply(op$r_sim,2,quantile,p=0.975)/chlamydia_dat$n#
+study_names <- c("Handsfield 1976", "Prentice 1976", "Johannisson 1979", "Paavonen 1980", "Joyner 2002", "Geisler 2008", "Stamm 1986", "van den Brule 2002")#
+plot(#
+	chlamydia_dat$t, #
+	chlamydia_dat$r/chlamydia_dat$n, #
+	pch=16, #
+	col=rep(1:8, times = chlamydia_dat$studobs), #
+	log='x',#
+	xlab = 'Mean follow-up time (years)', #
+	ylab= 'Proportion cleared infection'#
+	)#
+arrows(#
+	chlamydia_dat$t, #
+	y0 = apply(op$r_sim,2,quantile,p=0.025)/chlamydia_dat$n, #
+	y1 = apply(op$r_sim,2,quantile,p=0.975)/chlamydia_dat$n, #
+	col = rep(1:8, times = chlamydia_dat$studobs), #
+	code=3, angle=90, length = 0.1#
+	)#
+legend('topleft', col=1:8, pch=16, legend=study_names)
+hist(op$p1)
+hist(op$p1)
+hist(op$lambda_slow)
+mean(op$lambda_slow)
