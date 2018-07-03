@@ -271,6 +271,10 @@ for i in xrange(n_sample):
 
     [inc_f[i], scr_f[i], p_asymp_f[i]] = fsolve(lambda x: tmpfun(x[0], x[1], x[2]), [0.09, 0.25, 0.9] )
 
+# Alternative for women: 25/97 infected women developed symptoms (Geisler, Sex Transm Dis; 2008)
+        
+# p_asymp_f = rs.beta(73, 26, size=n_sample)
+
 
 
 
